@@ -1,0 +1,38 @@
+sudo: false
+os: linux
+dist: trusty
+
+language: php
+
+# Note: latest PHP version is tested with coverage
+php:
+  - 7.2
+
+services:
+  - mongodb
+
+env:
+  global
+    - DRIVER_VERSION="stable"
+  - SYMFONY_VERSION=4.1.* DEPENDENCIES=dev
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    
+addons:
+  apt:
+    sources:
+      - sourceline: "deb [arch=amd64] https://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse"
+        key_url: "https://www.mongodb.org/static/pgp/server-3.4.asc"
+      - "mongodb-upstart"
+    packages: ['mongodb-org-server']
+
+before_install:
+  - pecl install -f mongodb-${DRIVER_VERSION}
+  
+before_script:
+  # install alcaeus/mongo-php-adapter library in the project
+  - composer config "platform.ext-mongo" "1.6.16" && composer require alcaeus/mongo-php-adapter
+  #- composer update ${COMPOSER_FLAGS}
+  - composer require --dev phpunit/phpunit ^6.5
